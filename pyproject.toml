@@ -1,0 +1,28 @@
+[project]
+name = "kg-extract"
+version = "0.1.0"
+description = "Typed knowledge-graph extraction from technical documentation. GraphRAG over reference PDFs."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "openai>=1.40.0",
+    "instructor>=1.5.0",
+    "pydantic>=2.7.0",
+    "python-dotenv>=1.0.1",
+    "networkx>=3.3",
+    "tiktoken>=0.7.0",
+    # Vanilla RAG baseline — apples-to-apples comparison harness needs this:
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-community>=0.3.0",
+    "langchain-chroma>=0.1.4",
+    "chromadb>=0.5.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ipykernel>=6.29.0",
+    "rich>=13.7.0",
+]

@@ -1,0 +1,35 @@
+{
+  "_comment": "Five cross-section questions whose answers require traversing the typed graph rather than retrieving similar text. Each names entities verified to exist in graph_raw.json. Used by compare.py to produce the head-to-head report.",
+  "questions": [
+    {
+      "id": "Q1",
+      "question": "How does DRS interact with Admission Control in vSphere HA?",
+      "tests": "Cross-section dependency spanning Cluster Resource Management, Resource Pools, and HA chapters",
+      "expects_entities": ["comp.drs", "comp.admission_control", "comp.resource_pool", "comp.esxi_host"]
+    },
+    {
+      "id": "Q2",
+      "question": "What is FDM's relationship to HOSTD and vCenter, and what protects FDM if it fails?",
+      "tests": "Multi-predicate component neighborhood: depends-on chains plus the protects edge from the watchdog process",
+      "expects_entities": ["comp.fdm", "comp.hostd_agent", "comp.vcenter", "mech.fdm_watchdog_process"]
+    },
+    {
+      "id": "Q3",
+      "question": "What happens when HOSTD becomes unavailable on a cluster host?",
+      "tests": "Failure-mode propagation: triggers edge from a FailureMode to the component it affects",
+      "expects_entities": ["comp.hostd_agent", "comp.fdm", "fm.hostd_unavailable"]
+    },
+    {
+      "id": "Q4",
+      "question": "How does DPM interact with DRS and what conditions need to be met for it to power off hosts?",
+      "tests": "Inter-feature interaction across chapters: DPM behaviour requires DRS context",
+      "expects_entities": ["comp.dpm", "comp.drs", "comp.cluster"]
+    },
+    {
+      "id": "Q5",
+      "question": "What is the role of datastores in HA, and how do they relate to the master agent?",
+      "tests": "Cross-section: HA components in COMPONENTS OF HA chapter, datastore mechanics in storage chapter",
+      "expects_entities": ["comp.datastore", "comp.fdm", "comp.master"]
+    }
+  ]
+}

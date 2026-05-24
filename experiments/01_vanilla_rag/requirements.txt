@@ -1,0 +1,17 @@
+langchain>=0.3
+langchain-chroma>=0.1.4
+langchain-community>=0.3
+langchain-openai>=0.2
+langchain-huggingface>=0.1
+langchain-text-splitters>=0.3
+chromadb>=0.5
+sentence-transformers>=3.0
+python-dotenv>=1.0
+gradio>=4.0
+unstructured>=0.15
+
+# Optional — only for visualize_embeddings.py
+scikit-learn>=1.4
+plotly>=5.20
+numpy>=1.26
+tiktoken>=0.7

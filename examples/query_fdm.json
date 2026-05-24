@@ -1,0 +1,150 @@
+{
+  "id": "comp.fdm",
+  "name": "FDM",
+  "type": "Component",
+  "description": "The primary HA agent responsible for communicating host resource information, VM states, HA properties, handling heartbeat mechanisms, VM placement, VM restarts, and logging in a vSphere HA cluster.",
+  "outgoing": {
+    "performs": [
+      {
+        "to": "mech.ha_heartbeat",
+        "to_name": "HA Heartbeat",
+        "modality": "hard",
+        "confidence": 1.0,
+        "description": "FDM handles the heartbeat mechanism for HA.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#COMPONENTS OF HA",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      },
+      {
+        "to": "mech.inter_host_communication_redundancy",
+        "to_name": "Inter-host Communication Redundancy",
+        "modality": "hard",
+        "confidence": 1.0,
+        "description": "FDM automatically uses alternate communication paths in case of network failure if redundant management networks are configured.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#COMPONENTS OF HA",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      }
+    ],
+    "depends-on": [
+      {
+        "to": "comp.hostd_agent",
+        "to_name": "HOSTD Agent",
+        "modality": "hard",
+        "confidence": 1.0,
+        "description": "FDM depends on HOSTD for VM information and management.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#HOSTD Agent",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      },
+      {
+        "to": "comp.vcenter",
+        "to_name": "vCenter",
+        "modality": "hard",
+        "confidence": 1.0,
+        "description": "FDM talks directly to vCenter.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#HOSTD Agent",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      }
+    ],
+    "conflicts-with": [
+      {
+        "to": "comp.vpxa",
+        "to_name": "VPXA",
+        "modality": "soft",
+        "confidence": 0.8,
+        "description": "FDM is not dependent on VPXA in this release to avoid overhead and dependencies.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#HOSTD Agent",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      }
+    ]
+  },
+  "incoming": {
+    "protects": [
+      {
+        "from": "mech.fdm_watchdog_process",
+        "from_name": "FDM Watchdog Process",
+        "modality": "hard",
+        "confidence": 1.0,
+        "description": "The watchdog process protects the FDM agent by restarting it upon failure to maintain HA functionality.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#COMPONENTS OF HA",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      }
+    ],
+    "monitors": [
+      {
+        "from": "comp.fdm_log",
+        "from_name": "fdm.log",
+        "modality": "soft",
+        "confidence": 0.9,
+        "description": "The fdm.log file records operational messages related to FDM activities and HA events for troubleshooting.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#COMPONENTS OF HA",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      }
+    ],
+    "triggers": [
+      {
+        "from": "fm.hostd_unavailable",
+        "from_name": "HOSTD Unavailable",
+        "modality": "hard",
+        "confidence": 1.0,
+        "description": "When HOSTD is unavailable, FDM halts all functions and waits for HOSTD to become operational.",
+        "evidence": [
+          {
+            "source_id": "reference_doc",
+            "section": "eb-vmware-vsphere-clustering-deep-dive#HOSTD Agent",
+            "page": null,
+            "version": "1.x",
+            "schema_version": "1.0.0"
+          }
+        ]
+      }
+    ]
+  }
+}

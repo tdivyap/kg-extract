@@ -1,0 +1,23 @@
+graph LR
+  comp_admission_control["Admission Control"]
+  comp_cluster["Cluster"]
+  comp_cluster_host["Cluster Host"]
+  comp_datastore["Datastore"]
+  comp_esxi_host["ESXi Host"]
+  comp_failover_host["Failover Host"]
+  comp_fdm["Fault Domain Manager (FDM)"]
+  comp_fdm_log["fdm.log"]
+  comp_heartbeat_datastore["Heartbeat Datastore"]
+  comp_hostd_agent["HOSTD Agent"]
+  comp_vcenter["VMware vCenter Server Appliance"]
+  comp_vpxa["VPXA"]
+
+  comp_esxi_host -->|monitors| comp_datastore
+  comp_esxi_host -->|monitors| comp_vcenter
+  comp_failover_host -->|falls-back-to| comp_cluster_host
+  comp_fdm -->|depends-on| comp_hostd_agent
+  comp_fdm -->|depends-on| comp_vcenter
+  comp_fdm -->|conflicts-with| comp_vpxa
+  comp_fdm_log -->|monitors| comp_fdm
+  comp_vcenter -->|depends-on| comp_esxi_host
+  comp_vcenter -->|performs| comp_fdm

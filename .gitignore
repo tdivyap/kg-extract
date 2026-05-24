@@ -1,0 +1,33 @@
+# secrets — NEVER commit
+.env
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ipynb_checkpoints/
+
+# generated artifacts — keep the schema, NOT the run output
+graph_raw.json
+graph_resolved.json
+chroma_db/
+*.log
+
+# experiment artifacts
+experiments/02_page_index/page_index.json
+experiments/01_vanilla_rag/vector_db/
+
+# derived data from copyrighted sources — must not be redistributed
+knowledge_base/
+pdfs/
+*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

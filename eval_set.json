@@ -1,0 +1,45 @@
+{
+  "_comment": "Five cross-section questions whose answers require traversing the typed graph rather than retrieving similar text. Each names entities verified to exist in graph_raw.json. Used by compare.py to produce the head-to-head report.",
+  "questions": [
+    {
+      "id": "Q1",
+      "question": "How does DRS interact with Admission Control in vSphere HA?",
+      "tests": "Cross-section dependency spanning Cluster Resource Management, Resource Pools, and HA chapters",
+      "expects_entities": ["comp.drs", "comp.admission_control", "comp.resource_pool", "comp.esxi_host"]
+    },
+    {
+      "id": "Q2",
+      "question": "What is FDM's relationship to HOSTD and vCenter, and what protects FDM if it fails?",
+      "tests": "Multi-predicate component neighborhood: depends-on chains plus the protects edge from the watchdog process",
+      "expects_entities": ["comp.fdm", "comp.hostd_agent", "comp.vcenter", "mech.fdm_watchdog_process"]
+    },
+    {
+      "id": "Q3",
+      "question": "What happens when HOSTD becomes unavailable on a cluster host?",
+      "tests": "Failure-mode propagation: triggers edge from a FailureMode to the component it affects",
+      "expects_entities": ["comp.hostd_agent", "comp.fdm", "fm.hostd_unavailable"]
+    },
+    {
+      "id": "Q4",
+      "question": "How does DPM interact with DRS and what conditions need to be met for it to power off hosts?",
+      "tests": "Inter-feature interaction across chapters: DPM behaviour requires DRS context",
+      "expects_entities": ["comp.dpm", "comp.drs", "comp.cluster"]
+    },
+    {
+      "id": "Q5",
+      "question": "Describe the end-to-end failover workflow in vSphere HA — from host failure detection through VM restart. Cover: how the master detects a host failure (network heartbeat and datastore heartbeat), how it distinguishes failure from isolation or partition, the role of admission control before restart, the restart retry timeline, and what happens when VMs are powered back on.",
+      "tests": "Multi-chapter workflow synthesis spanning failure detection, isolation-vs-partition logic, master orchestration, admission control, and restart retry behavior. Vanilla RAG retrieves chunks similar to 'failover' from one chapter; GraphRAG traverses across components, mechanisms, concepts, and failure modes.",
+      "expects_entities": [
+        "concept.failover",
+        "comp.ha_master_node",
+        "comp.admission_control",
+        "concept.host_failure",
+        "concept.isolation_response",
+        "concept.datastore_heartbeat",
+        "concept.network_heartbeat",
+        "concept.restart_retry_timeline",
+        "concept.ha_initiated_restart"
+      ]
+    }
+  ]
+}

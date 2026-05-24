@@ -1,0 +1,47 @@
+[
+  {
+    "from": "comp.drs",
+    "to": "comp.esxi_host",
+    "predicate": "depends-on",
+    "description": "DRS depends on ESXi hosts to provide physical resources.",
+    "evidence": [
+      {
+        "source_id": "reference_doc",
+        "section": "eb-vmware-vsphere-clustering-deep-dive#Cluster Level Resource Management",
+        "page": null,
+        "version": "1.x",
+        "schema_version": "1.0.0"
+      }
+    ]
+  },
+  {
+    "from": "comp.esxi_host",
+    "to": "comp.resource_pool",
+    "predicate": "depends-on",
+    "description": "Resource pools aggregate CPU and memory resources from ESXi hosts.",
+    "evidence": [
+      {
+        "source_id": "reference_doc",
+        "section": "eb-vmware-vsphere-clustering-deep-dive#RESOURCE POOLS AND CONTROLS",
+        "page": null,
+        "version": "1.x",
+        "schema_version": "1.0.0"
+      }
+    ]
+  },
+  {
+    "from": "comp.resource_pool",
+    "to": "comp.admission_control",
+    "predicate": "monitors",
+    "description": "Admission Control monitors resource pool reservations to decide VM power on feasibility.",
+    "evidence": [
+      {
+        "source_id": "reference_doc",
+        "section": "eb-vmware-vsphere-clustering-deep-dive#Expandable Reservation",
+        "page": null,
+        "version": "1.x",
+        "schema_version": "1.0.0"
+      }
+    ]
+  }
+]

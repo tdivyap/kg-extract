@@ -1,0 +1,34 @@
+graph LR
+  comp_admission_control["Admission Control"]
+  comp_datastore["Datastore"]
+  comp_datastore_cluster["Datastore Cluster"]
+  comp_drs["DRS"]
+  comp_esxi_host["ESXi Host"]
+  comp_fdm["FDM"]
+  comp_ha_agent["HA Agent"]
+  comp_resource_pool["Resource Pool"]
+  comp_sioc["SIOC"]
+  comp_storage_drs["Storage DRS"]
+  comp_vcenter["vCenter"]
+  comp_vm["Virtual Machine (VM)"]
+
+  comp_admission_control -->|monitors| comp_resource_pool
+  comp_datastore -->|depends-on| comp_datastore_cluster
+  comp_datastore_cluster -->|depends-on| comp_datastore
+  comp_drs -->|depends-on| comp_esxi_host
+  comp_esxi_host -->|monitors| comp_datastore
+  comp_esxi_host -->|performs| comp_ha_agent
+  comp_esxi_host -->|monitors| comp_vcenter
+  comp_fdm -->|depends-on| comp_vcenter
+  comp_ha_agent -->|protects| comp_esxi_host
+  comp_ha_agent -->|protects| comp_vm
+  comp_resource_pool -->|depends-on| comp_esxi_host
+  comp_sioc -->|monitors| comp_datastore
+  comp_storage_drs -->|configures| comp_datastore
+  comp_storage_drs -->|configures| comp_datastore_cluster
+  comp_vm -->|depends-on| comp_datastore
+  comp_vm -->|depends-on| comp_datastore_cluster
+  comp_vm -->|depends-on| comp_resource_pool
+
+---
+Nodes: 12, edges: 17
