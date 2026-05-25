@@ -7,6 +7,45 @@ vanilla RAG cannot reconstruct.
 Companion blog: [From Retrieval to Synthesis](https://systems-ai.hashnode.dev)
 
 ---
+
+## About this project, and the source document used
+
+**This is an independent personal project.** It is not affiliated with,
+endorsed by, sponsored by, or connected to VMware, Broadcom, or any other
+company. All trademarks, product names, and component names mentioned in
+this repository or its derived artifacts belong to their respective owners.
+
+The demonstrations in this repository were produced by running the pipeline
+against a single publicly available reference book:
+
+> **"VMware vSphere 6.7 Clustering Deep Dive"** by Duncan Epping and
+> Frank Denneman
+
+This book was chosen because:
+
+1. It is **publicly and freely distributed** by the vendor — no paywall, no
+   restricted-access tier.
+2. It is **technically dense and well-structured**, making it a strong
+   test case for cross-section graph extraction.
+3. The author has worked extensively with this kind of fault-tolerant
+   distributed system and is therefore qualified to evaluate whether the
+   extracted graph captures the architecture correctly.
+
+**The source PDF itself is not redistributed in this repository.** Anyone
+reproducing the project must obtain their own copy. The `.gitignore`
+excludes the PDF and all derived markdown.
+
+**The extracted graph (`graph_raw.json`) is also not redistributed.**
+Each user runs the extraction on their own copy of the source. What is
+in the repo are the extraction pipeline, evaluation methodology, and
+result artifacts (entity counts, query examples, head-to-head report)
+— none of which reproduce substantial portions of the source text.
+
+The pipeline is **document-agnostic**. Any structured technical PDF will
+work; the source above is one demonstration corpus among many possible.
+
+---
+
 ## Demonstration on a real corpus
 
 Extracted from a 300-page technical reference. Total cost ~$3 in OpenAI credits.
@@ -26,6 +65,13 @@ GitHub also renders this natively as a Mermaid graph.
 ```bash
 $ uv run python graph_build.py --path comp.drs comp.admission_control
 ```
+
+Returns a 3-hop typed path that spans three different chapters of the source:
+
+```
+DRS  ──depends-on──>  ESXi Host  ──depends-on──>  Resource Pool  ──monitors──>  Admission Control
+```
+
 Full output: [`examples/path_drs_to_admission.png`](examples/path_drs_to_admission.png)
 
 ### Head-to-head against vanilla RAG
@@ -36,7 +82,7 @@ On the two questions where GraphRAG underperformed, the limitation was at the
 entity-router stage — the relationships were present in the graph, but the
 router didn't resolve them from the question phrasing.
 
-Returns a 3-hop typed path that spans three different chapters of the source:
+---
 
 ## What's in here
 
@@ -57,16 +103,13 @@ kg-extract/
 ├── compare.py               # Head-to-head harness over eval_set.json
 ├── eval_set.json            # 5 curated cross-section questions
 │
+├── examples/                # screenshots, diagrams, sample outputs
 ├── pdfs/                    # drop your source PDFs here (gitignored)
 ├── knowledge_base/          # parser output goes here (gitignored)
 │
 ├── experiments/             # earlier experiments referenced in the blog
 │   ├── 01_vanilla_rag/      # LangChain + Chroma + mxbai + Gradio (original)
-│   │   ├── ingest.py        #   build the Chroma store
-│   │   ├── chat.py          #   Gradio UI with the original system prompt
-│   │   └── visualize_embeddings.py
 │   └── 02_page_index/       # PyMuPDF + threadpool + the "Architect Prompt"
-│       └── page_index_query.py
 │
 └── docs/                    # methodology document (optional)
 ```
@@ -118,17 +161,6 @@ uv run python ingest.py
 
 Edit `INPUT_PDF` at the top of `ingest.py` to point at your source document.
 
-The output should land in `knowledge_base/` as one or more `.md` files.
-Layout doesn't matter; `extract.py` walks the directory recursively.
-
-```
-knowledge_base/
-└── my-source-doc/
-    ├── _page_1_.md
-    ├── _page_2_.md
-    └── ...
-```
-
 ### Step 2 — Extract the knowledge graph
 
 ```bash
@@ -142,55 +174,14 @@ Instructor. Writes everything to `graph_raw.json`.
 **Cost:** ~$2–5 in API spend for a 300-page technical book.
 **Time:** ~10 minutes.
 
-Expected output:
-
-```
-📄 my-source-doc/_page_1_.md
-  → Introduction
-  → Core Concepts
-...
-✅ Done. Processed 142 sections (3 failed).
-   Wrote 287 entities, 412 relations, 38 constraints, 24 parameters → graph_raw.json
-   Schema version: 1.0.0
-```
-
-A handful of `⚠ failed:` lines is fine — usually the model tried an invalid
-predicate. If half the sections fail, the extraction prompt or `SCHEMA.md`
-needs work.
-
-**Before customising the source_id / version**, edit the bottom of
-`extract.py`:
-
-```python
-if __name__ == "__main__":
-    run(
-        markdown_dir=Path("knowledge_base"),
-        source_id="my_source",       # ← name your corpus
-        version="1.x",                # ← what version of the source this is
-        out=Path("graph_raw.json"),
-    )
-```
-
 ### Step 3 — Inspect the graph
 
-Before running the comparison, sanity-check what got extracted.
-
 ```bash
-# Overall statistics — counts by entity type and predicate.
-uv run python graph_build.py
-
-# All edges of one predicate.
-uv run python graph_build.py --predicate depends-on
-
-# One node's neighborhood.
-uv run python graph_build.py --query comp.your_node
-
-# Path between two nodes (the test of the whole approach).
-uv run python graph_build.py --path comp.a comp.b
+uv run python graph_build.py                                    # overall stats
+uv run python graph_build.py --query comp.your_node             # one node's neighborhood
+uv run python graph_build.py --path comp.a comp.b               # path between two
+uv run python graph_build.py --predicate depends-on             # all edges of a type
 ```
-
-If a relationship you know exists in the source appears as an edge in the
-graph, the extraction worked. If not, the extraction prompt needs tuning.
 
 ### Step 4 — Run the head-to-head
 
@@ -198,16 +189,8 @@ graph, the extraction worked. If not, the extraction prompt needs tuning.
 uv run python compare.py
 ```
 
-Runs every question in `eval_set.json` through both pipelines and writes:
-
-- `comparison.json` — machine-readable
-- `comparison.md` — human-readable side-by-side
-
-**The `comparison.md` file is the screenshot artifact for your README,
-blog, resume.**
-
-Edit `eval_set.json` to use questions specific to your corpus. The defaults
-are placeholders.
+Runs every question in `eval_set.json` through both pipelines and writes
+`comparison.json` and `comparison.md` — the side-by-side report.
 
 ## Single-shot debugging
 
@@ -216,28 +199,12 @@ uv run python vanilla_rag.py "How does X relate to Y?"
 uv run python graph_rag.py   "How does X relate to Y?"
 ```
 
-Each prints the answer plus what was retrieved (chunks for vanilla,
-resolved entities + paths for graph).
-
-## What "good" looks like
-
-For each cross-section question in `eval_set.json` you want to see GraphRAG:
-
-1. Resolve the right entity IDs (printed in the output)
-2. Find a path between them when the question is relational
-3. Cite specific sections from the edge `evidence` fields
-4. State the relationship in terms of the predicate
-
-Vanilla RAG will often produce plausible-sounding text that misses the
-cross-section link entirely — confidently incomplete. That contrast is the
-demonstration.
-
 ## File-by-file guide
 
 0. **`ingest.py`** — Step 0 of the pipeline. Wraps Marker to convert source
    PDFs into structured markdown that `extract.py` can read. Marker has
    heavy ML dependencies and is not in `pyproject.toml`; install it in a
-   separate venv (see Step 1 above).
+   separate venv.
 
 1. **`schemas.py`** — Read first. Defines the typed shape of the graph.
    Frozen vocabularies for entity types and predicates. Field descriptions
@@ -259,7 +226,7 @@ demonstration.
    un-tuned so the comparison is fair.
 
 6. **`compare.py`** — Runs both pipelines on the eval set, writes the
-   markdown report. This is what produces your demo artifact.
+   markdown report.
 
 7. **`SCHEMA.md`** — The predicate vocabulary and the rules for evolving it.
    Read this before adding a new predicate.
@@ -270,7 +237,7 @@ Per full extraction run on a 300-page technical book:
 
 - Extraction (`gpt-4.1-mini`): $2–5
 - Vector index build (`text-embedding-3-small`): ~$0.20
-- Comparison run (5 questions × 2 LLM calls each, `gpt-4o`): ~$0.50
+- Comparison run (5 questions × ~3 LLM calls each, `gpt-4o`): ~$0.50
 
 Total to reproduce the project end-to-end: under $10.
 
@@ -307,11 +274,17 @@ documented in `SCHEMA.md`.
 - **Entity resolution** merges by exact ID match. Near-duplicates with
   different IDs slip through. Embedding-similarity merge is the production
   fix.
-- **Community detection** is not yet implemented. Local queries work; global
-  queries ("what are the main themes?") need Leiden clustering + per-cluster
-  summaries.
-- **No automated metrics** beyond the qualitative head-to-head. Hand-labeling
-  expected entities/paths and measuring precision/recall is the next step.
+- **The entity router at query time is the v1 bottleneck.** On 2 of 5
+  evaluation questions, the LLM-based router failed to resolve all
+  referenced entities even though the relationships existed in the graph.
+  Embedding-similarity over entity names with LLM disambiguation as
+  fallback is the natural upgrade.
+- **Community detection is not yet implemented.** Local queries work;
+  global queries ("what are the main themes?") need Leiden clustering +
+  per-cluster summaries.
+- **No automated metrics** beyond the qualitative head-to-head.
+  Hand-labeling expected entities/paths and measuring precision/recall is
+  the next step.
 
 These are documented next steps, not unknown unknowns.
 
